@@ -41,6 +41,8 @@ jobs:
         git checkout -- sitemap.xml || echo
         git reset rss.xml || echo 
         git checkout -- rss.xml || echo
+        git reset CNAME || echo 
+        git checkout -- CNAME || echo
     - name: Move new output into github pages branch
       run: |
         shopt -s dotglob
