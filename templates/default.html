@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="style.css" />
+    <title>{{ context.meta.title }} - Example Website</title>
+</head>
+<body>
+    <div id="navbar">{% include 'navbar.html' %}</div>
+    <div id="content">{{ context.content_html|safe }}</div>
+    <div id="footer">
+        {% block footer %}
+        &copy; Powered by <a href="http://mark2web.dutl.uk">mark2web</a>.
+        {% endblock %}
+    </div>
+</body>
+</html>

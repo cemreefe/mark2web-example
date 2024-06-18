@@ -1,0 +1,56 @@
+name: Render with Mark2Web (https://github.com/cemreefe/mark2web)
+
+on:
+  push:
+    branches: 
+    - main
+
+jobs:
+  run_script:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python3
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Clone mark2web
+      run: git clone https://github.com/cemreefe/mark2web
+    - name: Install dependencies and run mark2web
+      run: |
+        cd mark2web
+        python3 -m pip install --upgrade pip
+        pip3 install -r requirements.txt
+        python3 do.py --src_dir ../source \
+                      --out_dir ../output \
+                      --site_url 'https://mark2web-example.dutl.uk' \
+                      --template_dir ../templates \
+                      --config_path ../config.yaml
+    - name: Cleanup repo
+      run: |
+        rm -r mark2web
+    - name: Clone github pages branch and clean its contents, keep sitemap, rss
+      run: |
+        cd ..
+        mkdir ghp
+        cd ghp
+        git clone -b gh-pages https://github.com/${{ github.actor }}/${{ github.event.repository.name }}
+        cd ${{ github.event.repository.name }}
+        git rm -r '*' 
+        git reset sitemap.xml || echo 
+        git checkout -- sitemap.xml || echo
+        git reset rss.xml || echo 
+        git checkout -- rss.xml || echo
+    - name: Move new output into github pages branch
+      run: |
+        shopt -s dotglob
+        mv output/* ../ghp/${{ github.event.repository.name }}/
+        
+    - name: Commit changes
+      run: |
+        cd ../ghp/${{ github.event.repository.name }}/
+        git config --global user.name '${{ github.actor }}'
+        git config --global user.email '${{ github.actor }}@users.noreply.github.com'
+        git remote set-url origin https://x-access-token:${{ secrets.AUTO_RENDER_PAT_M2W }}@github.com/$GITHUB_REPOSITORY
+        git add -A 
+        git diff-index --quiet HEAD || git commit -m " - Mark2Web auto-render - ${{ github.event.head_commit.message }}" && git push    

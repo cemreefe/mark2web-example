@@ -1,0 +1,13 @@
+formats:
+  meta.date: '%Y-%m-%d'
+groups:
+  - name: special
+    template: default.html
+    rss: false
+    path_config:
+      - "['meta']['canonical-uri']"
+  - name: default
+    template: default.html
+    rss: false
+    path_config:
+      - "['file_relpath_without_extension']"
